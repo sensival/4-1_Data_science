@@ -17,6 +17,7 @@ import pandas as pd
 from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 
+
 #웹드라이버 설정
 driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
 
