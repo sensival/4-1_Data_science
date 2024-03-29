@@ -13,6 +13,7 @@ import json
 import re
 from bs4 import BeautifulSoup
 import unicodedata
+import pandas as pd
 
 try:
     with open('C:/Users/wogns/OneDrive/바탕 화면/Data_study/데이터사이언스/insta_crawling/config.json', 'r') as file:
@@ -55,26 +56,49 @@ alert_02.click()
 time.sleep(5)
 
 
-# 린가드 해시태그
-dr.get('https://www.instagram.com/explore/tags/'+ '린가드')
-search_list = wait.until(EC.element_to_be_clickable((By.CLASS_NAME, '_aagw')))
-search_list.click()
+# 해시태그
+dr.get('https://www.instagram.com/explore/tags/'+ '제넥솔')
+time.sleep(2)
 
-html = dr.page_source  # 페이지 소스 가져오기
-soup = BeautifulSoup(html, 'html.parser')  # BeautifulSoup을 이용해 HTML 파싱
 
-content = soup.select('div._a9zs > h1')[0].text
-print(content)
-time.sleep(5)
+def get_content(dr, n):
+    time.sleep(1)
+    list = dr.find_elements(By.CLASS_NAME,"_aagw") ##리스트를 가져와서
+    list[n].click() ##리스트 요소 중 첫번째를 클릭
+    time.sleep(1)
+    html = dr.page_source  # 페이지 소스 가져오기
+    soup = BeautifulSoup(html, 'html.parser')  # BeautifulSoup을 이용해 HTML 파싱
+    content = soup.select('div._a9zs > h1')[0].text
+    time.sleep(1)
+    dr.back()
+    
+    return content
+
+results = []
+target = 3
+
+for i in range(target):
+
+    try:
+        time.sleep(2)
+        data = get_content(dr, i) #게시글 정보 가져오기
+        results.append(data)
+
+    except:
+        time.sleep(2)
+
+        
+
+        
+for i in range(target):
+    print(results[i])
+
 '''
-
 try:
-    # 1) 현재 페이지의 HTML 정보 가져오기
     html = dr.page_source
-    soup = BeautifulSoup(html, 'lxml')
+    soup = BeautifulSoup(html, 'html.parser')
 
 
-    # 2) HTML을 텍스트 파일로 저장하기
     with open('페이지.html', 'w', encoding='utf-8') as file:
 
         file.write(str(soup))
@@ -91,9 +115,60 @@ try:
 except Exception as e:
     content = ''
     print(e)
-    print(content)
 
-     
+
+
+
+
+# 엑셀 파일로 저장
+writer = pd.ExcelWriter('filab_tw.xlsx', engine='xlsxwriter')
+
+# 데이터프레임을 엑셀 파일로 변환
+df.to_excel(writer, sheet_name='Sheet1')
+
+# Pandas 엑셀 라이터 닫기 및 Excel 파일로 출력 
+writer.save()
+
+lastHeight = dr.execute_script("return document.body.scrollHeight")  # 스크롤 높이 저장
+
+while True:
+        dr.execute_script("window.scrollTo(0, document.body.scrollHeight);")  # 페이지 스크롤 다운
+        time.sleep(1)  # 1초 대기 페이지 로딩 기다리기
+
+        newHeight = dr.execute_script("return document.body.scrollHeight")  # 새로운 스크롤 높이
+
+        # 스크롤이 내려가고있으면 계속 업데이트
+        if newHeight != lastHeight:
+            try:
+                html = dr.page_source
+                soup = BeautifulSoup(html, 'html.parser')
+
+                with open('페이지.html', 'w', encoding='utf-8') as file:
+                    file.write(str(soup))
+
+
+            except Exception as e:
+                print("오류 발생:", e)
+                
+
+            try:
+                content = soup.select('div._a9zs > h1')[0].text
+                content = unicodedata.normalize('NFC',content)
+
+            except Exception as e:
+                content = ''
+                print(e)
+
+        else:
+            totalfreq.append(dailyfreq)  # 날짜 추가
+            wordfreq = 0  # 단어 빈도수 초기화
+            startdate = untildate  # 시작 날짜 변경
+            untildate += dt.timedelta(days=1)  # 다음 날짜로 변경
+            dailyfreq = {}  # dailyfreq 초기화
+            totaltweets.append(tweets)  # 트윗 리스트에 트윗 추가
+            break
+
+   
 tags = re.findall(r'#[^\s#,\\]+', content)
 
 
