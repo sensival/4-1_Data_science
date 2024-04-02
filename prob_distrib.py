@@ -225,7 +225,6 @@ plt.show()
 
 
 import matplotlib.pyplot as plt
-%matplotlib inline
 from scipy.special import factorial, comb
 
 
@@ -326,7 +325,7 @@ for line in sys.stdin:
     words = line.split() 
     # increase counters 
     for word in words: 
-        print '%s\t%s' % (word, 1)
+        print ('%s\t%s' % (word, 1))
 
 # In[ ]:
 
@@ -351,8 +350,8 @@ for line in sys.stdin:
         current_count += count
     else:
         if current_word:
-            print '%s\t%s' % (current_word, current_count)
+            print ('%s\t%s' % (current_word, current_count))
         current_count = count
         current_word = word
 if current_word == word:
-    print '%s\t%s' % (current_word, current_count)
+    print ('%s\t%s' % (current_word, current_count))
