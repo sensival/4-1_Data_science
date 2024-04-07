@@ -1,4 +1,4 @@
-
+'''
 import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
@@ -52,13 +52,13 @@ lmplot() 함수는 데이터를 시각화하고 선형 관계를 탐색하는 �
 """
 
 '''
-# In[7]:
-
 
 from sklearn import datasets
 import pandas as pd
-iris = datasets.load_iris()
-
+import seaborn as sns
+iris = sns.load_dataset("iris")
+iris.info()
+print('aaaa')
 labels = pd.DataFrame(iris.target)
 labels.columns=['labels']
 data = pd.DataFrame(iris.data)
@@ -82,7 +82,7 @@ import matplotlib.pyplot  as plt
 import seaborn as sns
 
 # create model and prediction
-model = KMeans(n_clusters=3,algorithm='auto')
+model = KMeans(n_clusters=3,algorithm='elkan') # KMeans must be a str among {'elkan', 'lloyd'}.
 model.fit(feature)
 predict = pd.DataFrame(model.predict(feature))
 predict.columns=['predict']
@@ -164,4 +164,3 @@ plt.xlabel('number of clusters, k')
 plt.ylabel('inertia')
 plt.xticks(ks)
 plt.show()
-'''
