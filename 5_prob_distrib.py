@@ -1,154 +1,34 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
-import numpy as np 
-
-x = np.array([ 18,   5,  10,  23,  19,  -8,  10,   0,   0,   5,   2,  15,   8,
-                2,   5,   4,  15,  -1,   4,  -7, -24,   7,   9,  -6,  23, -13,
-                1,   0,  16,  15,   2,   4,  -7, -18,  -2,   2,  13,  13,  -2,
-               -2,  -9, -13, -16,  20,  -4,  -3, -11,   8, -15,  -1,  -7,   4,
-               -4, -10,   0,   5,   1,   4,  -5,  -2,  -5,  -2,  -7, -16,   2,
-               -3, -15,   5,  -8,   1,   8,   2,  12, -11,   5,  -5,  -7,  -4])
-
-# In[2]:
-
-
-len(x)  # 갯수
-np.mean(x) # 평균
-np.var(x) # 분산
-np.std(x)  # 표준 편차
-np.max(x)  # 최댓값
-np.min(x)  # 최솟값
-np.median(x)  # 중앙값
-np.percentile(x, 25)  # 1사분위 수
-np.percentile(x, 50)  # 2사분위 수
-np.percentile(x, 75)  # 3사분위 수
-
-# In[5]:
-
-
-import scipy.stats
-scipy.stats.describe(x)
-
-# In[7]:
-
-
-import pandas as pd
-s = pd.Series(x)
-s.describe()
-
-# In[8]:
-
-
-import collections 
-
-num_firends = [100,40,30,54,25,3,100,100,100,3,3] 
-friend_counts = collections.Counter(num_firends) 
-print('friends:', friend_counts)
-
-# In[10]:
-
-
-import collections 
-import matplotlib.pyplot as plt 
-
-num_firends = [100,40,30,30,30,30,30,30,30,30,54,54,54,54,54,54,54,54,25,3,100,100,100,3,3] 
-friend_counts = collections.Counter(num_firends) 
-print('friends:', friend_counts) 
-
-# 가시화 추가 
-xs = range(101) 
-ys = [friend_counts[x] for x in xs] 
-# 파이썬에는 이렇게 List구축을 할 수 있습니다. 
-#list comprehension 라고 말합니다. 
-
-plt.bar(xs,ys) 
-plt.axis([0,101,0,25]) 
-plt.xlabel("# of friends") 
-plt.ylabel("# of people") 
-plt.show()
-
-# In[12]:
-
-
-num_firends = [100,40,30,30,30,30,30,30,30,30,54,54,54,54,54,54,54,54,25,3,100,100,100,3,3] 
-num_points = len(num_firends) 
-print(num_points) # 25 
-
-max_value = max(num_firends) 
-print(max_value) # 100 
-min_value = min(num_firends) 
-print(min_value) # 3
-
-
-# In[14]:
-
-
-num_firends = [100,40,30,30,30,30,30,30,30,30,54,54,54,54,54,54,54,54,25,3,100,100,100,3,3] 
-
-sorted_values = sorted(num_firends) # 오름차순으로 정렬된 리스트를 반환한다 
-second_smallest_value = sorted_values[1] # 두번째로 작은 값 
-second_largest_value = sorted_values[-2] # 두번째로 큰 값 , 파이선에서 -1 은 가장 뒤를 말한다
-
-def mean(x) : return sum(x) / len(x) 
-
-avgOfFriends = mean(num_firends) 
-print(avgOfFriends)  # 45.84
-
-
-# In[19]:
-
-
-num_firends = [1200,15,10,10,9,4,3,3,2,1] 
-
-def mean(x) : 
-    return sum(x) / len(x) 
-
-avgOfFriends = mean(num_firends) 
-print(avgOfFriends) 
-
-def median(v) : 
-    n = len(v) 
-    sorted_v = sorted(v) # 정렬해준뒤에 
-    midpoint = n // 2 # // 로 나누면 int형이 됨. / 로 나누면 float 
-
-    if n % 2 == 1: 
-        return sorted_v(midpoint) # 리스트가 홀 수면 가운데 값 
-
-    else : 
-        lo = midpoint - 1 # 짝수면 가운데의 2개의 값의 평균 
-        hi = midpoint 
-        return (sorted_v[lo]+sorted_v[hi]) / 2 
-
-medianOfFriends = median(num_firends) 
-print(medianOfFriends) 
-
-#결과 평균: 125.7 중앙값: 6.5
-
-
-# In[20]:
-
-
+######### 정규분포 시각화
 import math
-from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt  
+
+# 정규 분포의 확률 밀도 함수(pdf)를 계산하기 위한 함수
 def normal_pdf(x, mu=0, sigma=1):
-    sqrt_two_pi = math.sqrt(2 * math.pi)
-    return (math.exp(-(x-mu)**2 / 2 / sigma**2) / (sqrt_two_pi * sigma))
+    sqrt_two_pi = math.sqrt(2 * math.pi)  # 2*pi의 제곱근을 계산---> 정규분포의 확률 밀도 함수에 쓰임
+    # 정규 분포에 대한 확률 밀도 함수
+    return (math.exp(-(x-mu)**2 / 2 / sigma**2) / (sqrt_two_pi * sigma)) #  exp() : e의 거듭제곱 값을 계산
+
+# -5부터 5까지 0.1씩 증가하는 x 값 리스트를 생성
 xs = [x / 10.0 for x in range(-50,50)]
+
+# mu=0이고 sigma=1인 경우의 정규 분포의 확률 밀도 함수를 그립니다.
 plt.plot(xs,[normal_pdf(x,sigma=1) for x in xs],'-',label='mu=0,sigma=1')
+
+# mu=0이고 sigma=2인 경우의 정규 분포의 확률 밀도 함수를 그립니다.
 plt.plot(xs,[normal_pdf(x,sigma=2) for x in xs],'--',label='mu=0,sigma=2')
+
+# mu=0이고 sigma=0.5인 경우의 정규 분포의 확률 밀도 함수를 그립니다.
 plt.plot(xs,[normal_pdf(x,sigma=0.5) for x in xs],':',label='mu=0,sigma=0.5')
+
+# mu=-1이고 sigma=1인 경우의 정규 분포의 확률 밀도 함수를 그립니다.
 plt.plot(xs,[normal_pdf(x,mu=-1) for x in xs],'-.',label='mu=-1,sigma=1')
+
 plt.legend()
-plt.title('Various Normal pdfs')
+plt.title('다양한 정규 분포의 확률 밀도 함수')
 plt.show()
 
-# In[21]:
 
-
+######### 누적 확률분포 시각화
 import math
 from matplotlib import pyplot as plt
 def normal_cdf(x, mu=0, sigma=1):
@@ -162,9 +42,9 @@ plt.legend(loc=4)
 plt.title('Various Normal cdfs')
 plt.show()
 
-# In[44]:
 
 
+######### 이항 분포와 정규 근사(중심 극한 정리) 시각화
 import math
 import random
 from collections import Counter
@@ -196,9 +76,9 @@ plt.title("Binomial Distribution vs. Normal Approximation")
 make_hist(0.5,100,10000)  # 성공확률 0.5, 시행 100번, 수행 10000회
 plt.show()
 
-# In[48]:
 
 
+######### 이항분포 시각화 p=0.5
 import numpy as np 
 import matplotlib
 import scipy as sp 
@@ -221,12 +101,10 @@ plt.grid()
 plt.legend()
 plt.show()
 
-# In[53]:
 
-
+######### 초기하분포 시각화 p=1/3
 import matplotlib.pyplot as plt
 from scipy.special import factorial, comb
-
 
 
 f = factorial(n) / (factorial(x) * factorial(n - x))
@@ -246,8 +124,8 @@ plt.title('Binomial Distribution(n = 20, p = 1/3)')
 plt.grid()
 plt.show()
 
-# In[54]:
 
+######### 이항분포 시각화 p=random
 
 import numpy as np 
 import matplotlib
@@ -268,9 +146,8 @@ plt.grid()
 plt.legend()
 plt.show()
 
-# In[56]:
 
-
+######## 카이제곱 분포
 import scipy.stats as stats
 import numpy as np
 
@@ -291,9 +168,8 @@ plt.title(r'$\chi^2$ Distribution with scipy.stats')     # 타이틀 표시
 plt.legend()                         # 범례 표시
 plt.show()                           # 플롯 보이기
 
-# In[58]:
 
-
+###### 포아송분포
 from scipy.stats import poisson
 from numpy import arange, exp, power
 from scipy.special import factorial
@@ -313,45 +189,3 @@ plt.title('Poisson Distribution')
 plt.grid()
 plt.legend()
 plt.show()
-
-# In[ ]:
-
-
-import sys 
-for line in sys.stdin: 
-    # remove leading and trailing whitespace 
-    line = line.strip() 
-    # split the line into words 
-    words = line.split() 
-    # increase counters 
-    for word in words: 
-        print ('%s\t%s' % (word, 1))
-
-# In[ ]:
-
-
-import sys
-current_word = None
-current_count = 0
-word = None
-for line in sys.stdin:
-    # remove leading and trailing whitespaces
-    line = line.strip()
-    # parse the input we got from mapper.py
-    word, count = line.split('\t', 1)
-    # convert count (currently a string) to int
-    try:
-        count = int(count)
-    except ValueError:
-        # count was not a number, so silently
-        # ignore/discard this line
-        continue
-    if current_word == word:
-        current_count += count
-    else:
-        if current_word:
-            print ('%s\t%s' % (current_word, current_count))
-        current_count = count
-        current_word = word
-if current_word == word:
-    print ('%s\t%s' % (current_word, current_count))
