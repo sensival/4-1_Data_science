@@ -13,7 +13,7 @@ print(df.isnull().sum())
 
 # 전체 data 개수 대비 NaN의 비율
 print("Nan확인2")
-df.isnull().sum() / len(df)
+print(df.isnull().sum() / len(df))
 
 # 결측치 row 날려버리기
 # 튜플에서 데이터가 하나라도 없으면 날려버리기
@@ -36,17 +36,19 @@ print("Nan을 0으로 채우기")
 df4 =  df['age'].fillna(0)
 print(df4)
 
-# 평균값으로 채워버리기
+# 경고 제거를 위해 inplace=True 대신 inplace=False를 사용하고, 결과를 새로운 변수에 할당
 print("Nan을 평균으로 채우기")
-df5 = df['age'].fillna(df['age'].mean(), inplace=True)                                    
+df5 = df['age'].fillna(df['age'].mean(), inplace=False)
 print(df5)
 
-# 그룹 범주로 나눠서 그룹별 평균값으로 채워버리기
-print("Nan을 같은 성별 평균으로 채우기")
-df6 = df['age'].fillna(df.groupby('sex')['age'].transform('mean'), inplace=True)
+# 성별 그룹별 평균값으로 채워넣기
+print("Nan을 성별 평균으로 채우기")
+df6 = df['age'].fillna(df.groupby('sex')['age'].transform('mean'), inplace=False)
 print(df6)
 
 # 컬럼 A와 B 모두 Null이 아닌 경우만 표시
 print("성별과 나이가  둘다 Nan이 아닌경우")
 df7=df[df['age'].notnull() & df['deck'].notnull()] 
 print(df7)
+
+
