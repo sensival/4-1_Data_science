@@ -1,7 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[5]:
 
 
 import pandas as pd
@@ -52,17 +48,5 @@ drop_mssing_filled_with_regress[['Name_eng','유동비율']]
 
 # csv로
 drop_mssing_filled_with_regress[['Name_eng','유동비율']].to_csv('company_fill.csv', index=False)
-
-
-
-
-
-# In[ ]:
-
-
-
-
-# In[ ]:
-
 
 
