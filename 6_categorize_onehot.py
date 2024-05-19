@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 data = pd.read_csv('application_train.csv')
@@ -61,7 +60,6 @@ for x in category_list:
     col = x + '_1'
     print(col)
     print(max(categories_encoded[col].values))
-    
     print(x, ' max : ', max(categories_encoded[col].values)[0])
 
 
@@ -79,8 +77,18 @@ for x in one_hot_list:
     X = data[x]
     x_encoded, x_categories = X.factorize()
     x_1hot = encoder.fit_transform(x_encoded.reshape(-1,1)) # reshape(-1,1)을 사용하여 1차원 배열을 2차원 배열로 변환하고, 그 다음 fit_transform() 메서드를 사용하여 원-핫 인코딩을 수행
+    '''
+    CODE_GENDER
+    (0, 0)        1.0
+    (1, 1)        1.0
+    (2, 0)        1.0
+   '''
     x_1hot = x_1hot.toarray()    
-    print(x_1hot)
+    '''
+     [1. 0. 0.]
+    [1. 0. 0.]
+    [1. 0. 0.]]
+    '''
 
     # dataframe
     temp_df = pd.DataFrame(x_1hot)
