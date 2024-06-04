@@ -1,3 +1,4 @@
+# 장바구니 데이터 연관검색----디버그 못함 
 import pandas as pd
 import itertools
 df = pd.read_csv('marketbasket.csv', index_col=0)
