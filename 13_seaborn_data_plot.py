@@ -138,7 +138,7 @@ print(df.head(10))
 
 sns.lineplot(x="timepoint", y="signal",
              hue="region", style="event",
-             data=fmri, ci=None)
+             data=fmri)# 신뢰 구간 없애려면 errorbar=None
 plt.show();
 
 
