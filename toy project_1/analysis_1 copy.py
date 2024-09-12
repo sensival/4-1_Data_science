@@ -30,7 +30,7 @@ scaler = RobustScaler()
 cancer_data[numeric_columns.columns] = scaler.fit_transform(cancer_data[numeric_columns.columns])
 
 
-# 각 기간별 암 발생률 열의 표준편차 계산
+# 지역별 암 발생률 열의 변동계수 계산
 range= cancer_data[cancer_columns].std() / cancer_data[cancer_columns].mean()
 
 range_sorted = range.sort_values(ascending=False)
