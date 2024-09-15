@@ -10,11 +10,10 @@ import matplotlib.pyplot as plt
 
 plt.rcParams['font.family'] = 'Malgun Gothic'  
 
+# data import
 cancer_data = pd.read_csv("시군구_암종_시기 - 시트1.csv")
 
-
-
-
+# 모든암 열 drop
 cancer_data = cancer_data.drop(columns=['모든 암(C00-C96)'], errors='ignore')
 
 
@@ -25,7 +24,6 @@ cancer_data[numeric_columns.columns] =numeric_columns.fillna(numeric_columns.mea
 
 # 암 발생률 열 선택 (시기와 지역 열 제외)
 cancer_columns = cancer_data.columns[2:]
-
 scaler = RobustScaler()
 cancer_data[numeric_columns.columns] = scaler.fit_transform(cancer_data[numeric_columns.columns])
 
