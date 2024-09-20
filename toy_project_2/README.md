@@ -14,8 +14,6 @@
 **`데이터 원본: KOSIS '22대 분류별 진료현황'`**
 
 ![2671a043-5bf7-49cd-91eb-6e5642dda072](https://github.com/user-attachments/assets/5bceda64-e739-4583-ba6b-5160f002989e)
-![**`데이터 원본: KOSIS '사망원인(237항목)/성/연령별 사망자수, 사망률'`**](image.png)
-
 **`데이터 원본: KOSIS '사망원인(237항목)/성/연령별 사망자수, 사망률'`**
 
 암은 국내 주요 사망 원인 중 하나로, 다양한 요인에 의해 발생할 수 있습니다. 이 프로젝트는 KOSIS 암 등록 통계([1. 시군구 시기/24개 암종/성별 암발생자수, 상대빈도, 조발생률, 연령표준화발생률 (kosis.kr)](https://kosis.kr/statHtml/statHtml.do?orgId=117&tblId=DT_117N_A11109&vw_cd=MT_ZTITLE&list_id=F_35&scrId=&seqNo=&lang_mode=ko&obj_var_id=&itm_id=&conn_path=MT_ZTITLE&path=%252FstatisticsList%252FstatisticsListIndex.do))를 분석 및 시각화하여, **지역간 발생를의 격차가 큰 암종을 확인**하고 요인을 분석하기 위해 진행되었습니다 .
