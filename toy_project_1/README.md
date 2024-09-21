@@ -1,279 +1,164 @@
-# COVID-19 예후 예측 모델
+# 암 발생률의 지역간 격차와 요인 분석
 
 2024.09 - 2024.09
 
 **`Sole contributer`**
 
-<br>
+
 
 # 프로젝트 요약
 
-**코로나19 환자의 임상 데이터**를 활용하여 환자의 예후(회복 여부)를 예측하는 모델을 개발하고, 여러 머신러닝 알고리즘의 성능을 비교하고자 하였습니다. 이를 위해 sklearn 라이브러리를 통해 **K-최근접 이웃(KNN), 인공 신경망(ANN), 서포트 벡터 머신(SVM), 랜덤 포레스트(Random Forest), XGBoost**와 같은 대표적인 분류 알고리즘을 예측 모델을 구축하고, 모델의 정확도와 성능을 평가하였습니다.
+
+
+![image](https://github.com/user-attachments/assets/b495e218-ebb0-4ec8-a47a-8a9fc99b49cd)
+**`데이터 원본: KOSIS '22대 분류별 진료현황'`**
+
+![2671a043-5bf7-49cd-91eb-6e5642dda072](https://github.com/user-attachments/assets/5bceda64-e739-4583-ba6b-5160f002989e)
+**`데이터 원본: KOSIS '사망원인(237항목)/성/연령별 사망자수, 사망률'`**
+
+암은 국내 주요 사망 원인 중 하나로, 다양한 요인에 의해 발생할 수 있습니다. 이 프로젝트는 KOSIS 암 등록 통계([1. 시군구 시기/24개 암종/성별 암발생자수, 상대빈도, 조발생률, 연령표준화발생률 (kosis.kr)](https://kosis.kr/statHtml/statHtml.do?orgId=117&tblId=DT_117N_A11109&vw_cd=MT_ZTITLE&list_id=F_35&scrId=&seqNo=&lang_mode=ko&obj_var_id=&itm_id=&conn_path=MT_ZTITLE&path=%252FstatisticsList%252FstatisticsListIndex.do))를 분석 및 시각화하여, **지역간 발생를의 격차가 큰 암종을 확인**하고 요인을 분석하기 위해 진행되었습니다 .
+
 
 <br>
 
 # 데이터 수집
 
 
-![image](https://github.com/user-attachments/assets/11cbdc67-06ea-44f9-bc76-e21868950b2b)
 
-- **출처 :**  [COVID-19 Complete Blood Count (CBC) Database (kaggle.com)](https://www.kaggle.com/datasets/tawsifurrahman/covid19-complete-blood-count-clinical-database)
-- **데이터 요약** : 방글라데시 다카 의료 대학 병원에서 수집 된 103명의 환자(생존 61명(59.22%), 사망 42명(40.78%))의 임상 매개변수와 병원 입원, 퇴원/사망 결과가 수집
-- **12열**: 입원일, 퇴원(사망일), 결과, 나이, 성별, 데이터수집일, 받은 치료 내용, Ventilateor 적용여부, RBC, Monocyte, WBC, PLT, Lymphocyte, Neutrophils
-- **103행**: 103명의 환자
+## **KOSIS 암 등록 통계**
+
+- **출처 :** [1. 시군구 시기/24개 암종/성별 암발생자수, 상대빈도, 조발생률, 연령표준화발생률 (kosis.kr)](https://kosis.kr/statHtml/statHtml.do?orgId=117&tblId=DT_117N_A11109&vw_cd=MT_ZTITLE&list_id=F_35&scrId=&seqNo=&lang_mode=ko&obj_var_id=&itm_id=&conn_path=MT_ZTITLE&path=%252FstatisticsList%252FstatisticsListIndex.do))
+- **시기** : 1999-2003년,  2004-2008년,  2009-2013년,  2014-2018년
+- **시/도** : 서울특별시 등 17개 행정구역(세종특별자치시는 1999-2003년,  2004-2008년 데이터 없음)
+- **27열:** 시기, 지역, 모든 암, 간암, 갑상선암 등 24개 암종
+- **72행**: 4개의 조사구간 별로 17개 행정구역
+- **연령표준화 발생률(값)** :우리나라 2020년 주민등록 인구를 표준인구로 사용하여 산출(명/10만명)
+
+## **질병관리청 지역사회건강조사**
+
+- **출처:** [시도별 주요결과 < 질병관리청 지역사회건강조사 (kdca.go.kr)](https://chs.kdca.go.kr/chs/recsRoom/ctprvnResultMain.do))
+- **시기** : 2009-2013년,  2014-2018년
+- **시/도** : 서울특별시 등 17개 행정구역(세종특별자치시는 2009-2013년 데이터 없음)
+- **10열** : 시기, 지역, 삶의 질, 당뇨, 고혈압, 스트레스 인지율, 걷기실천율, 월간 음주율, 현재 흡연률, 저염식 선호율)
+- **72행** : 2개의 조사구간 별로 17개 행정구역
+- **표준화율(값):** 인구구성 차이에 따른 영향을 표준인구로 보정한 결과
 
 <br>
 
 # 데이터 전처리
 
-### 재원일수 계산
+## **KOSIS 암 등록 통계**
 
-- 퇴원일 – 입원일
+### 결측치 처리
 
-```python
-covid_data['Hospital_Day'] = (covid_data['Discharge_DATE_or_date_of_Death'] - covid_data['Admission_DATE_']).dt.days
-```
-
-![image 1](https://github.com/user-attachments/assets/9343a04f-9264-4932-a62c-e8ad9f80fa52)
-![image 2](https://github.com/user-attachments/assets/e43d4314-1d84-41b9-aa34-29770d665953)
-
-### 이진 인코딩
-
-- ‘Outcome’열 : Recovered -> 1, Not_recovered -> 0)
-- ‘Gender’열 : Male -> 1, Female -> 0
-- ‘Ventilated_(Y/N)’열 : Yes -> 1, No -> 0
+> 열의 평균으로 처리
+> 
 
 ```python
-# # Outcome 열 이진 인코딩 (Recovered -> 1, Not_recovered -> 0)
-covid_data['Outcome'] = covid_data['Outcome'].map({'Recovered': 1, 'Not Recovered': 0})
-
-# Gender 열 이진 인코딩 (Male -> 1, Female -> 0)
-covid_data['Gender'] = covid_data['Gender'].map({'Male': 1, 'Female': 0})
-
-# Ventilated_(Y/N) 열 이진 인코딩 (Yes -> 1, No -> 0)
-covid_data['Ventilated'] = covid_data['Ventilated'].map({'Yes': 1, 'No': 0})
+# 숫자형 열의 평균으로 결측치 채우기
+numeric_columns = cancer_data.select_dtypes(include=['float64', 'int64'])
+cancer_data[numeric_columns.columns] =numeric_columns.fillna(numeric_columns.mean())
 ```
 
-![image 3](https://github.com/user-attachments/assets/bf8e07ec-5d72-41a8-a20e-efb2598cbc6a)
-![image 4](https://github.com/user-attachments/assets/50333dbb-9baa-44cc-a4c7-1cdca8f34884)
+![image 1](https://github.com/user-attachments/assets/99b9a50b-66e1-44c3-9a47-241c4fa07cdf)
 
-### One-hot 인코딩:
+### **데이터 스케일링**
 
-- ‘What kind of Treatment provided’ 열의 값 목록을 다시 열로 만들어 0 또는 1로 인코딩
+> Robust Scaler
+> 
 
 ```python
-covid_data['What_kind_of_Treatment_provided_'] = covid_data['What_kind_of_Treatment_provided_'].str.split(',')
-
-mlb = MultiLabelBinarizer()
-treatment_encoded = mlb.fit_transform(covid_data['What_kind_of_Treatment_provided_'])
-
-treatment_encoded_df = pd.DataFrame(treatment_encoded, columns=mlb.classes_)
-
-covid_data_encoded = pd.concat([covid_data, treatment_encoded_df], axis=1).drop('What_kind_of_Treatment_provided_', axis=1)
+scaler = RobustScaler()
 ```
 
+## **질병관리청 지역사회건강조사**
 
-![image 5](https://github.com/user-attachments/assets/5d4f6e5f-3a9f-4c9d-a131-4e2a7eea0e25)
-![image 6](https://github.com/user-attachments/assets/c92ab270-5c15-495a-9ed0-b88872d2b36d)
+### 데이터 병합
 
+> 지역별 암 발생률 데이터와 inner join
+> 
+
+```python
+# 시기와 지역이 같은 데이터 조인하기
+merged_data = pd.merge(cancer_data, factor_data, on=['시기', '지역'], how='outer')
+```
+
+![image 2](https://github.com/user-attachments/assets/5c93a9e4-5692-4314-9889-df1917f8d85e)
+### 결측치 처리
+
+> 시각화 후 1) 열의 평균으로 처리 또는 2)행 삭제
+> 
+
+```python
+# null이 2개이상인 행 삭제
+merged_data = merged_data[merged_data.isnull().sum(axis=1) < 2]
+
+# 2009-2013 제주도의 값이 없는 호지킨림프종은 mean으로
+merged_data['호지킨 림프종(C81)'] = merged_data['호지킨 림프종(C81)'].fillna(merged_data['호지킨 림프종(C81)'].mean())
+```
+
+![image 3](https://github.com/user-attachments/assets/6a5e0e87-d1a8-45de-abf7-23f8e7c89e5f)
 
 <br>
 
-# **탐색적 데이터 분석(EDA)**
+# 데이터 분석
 
 
-## 데이터 분포 및 이상치 확인
+## **KOSIS 암 등록 통계**
 
-![image 7](https://github.com/user-attachments/assets/15c5cffd-5969-4e8e-89c5-1af7e892e67d)
-
-## Pearson 상관관계 매트릭스와 P-value 매트릭스
-
-![image 8](https://github.com/user-attachments/assets/597df392-0b6f-4b0d-be31-a7795bd390fe)
-
-<br>
-
-# 모델 소개
-
-
-
-- **인공신경망 (ANN, Artificial Neural Network):** 신경망 모델의 가장 기본적인 형태로, 입력층, 은닉층, 출력층으로 나뉩니다. 각 층은 이전 층의 출력을 입력으로 받아 가중치를 조정하며 학습합니다.
-![glossarymultilayered](https://github.com/user-attachments/assets/f12007ab-73f6-45ae-b93c-0af50e31bf32)
-
-
-
-
-
-
-
-- **K-최근접 이웃 (KNN, K-Nearest Neighbors)**: KNN은 가장 가까운 K개의 데이터 포인트를 참고하여 분류하는 모델입니다. 거리에 기반하여 데이터 포인트 간의 유사성을 계산합니다.
-![image 9](https://github.com/user-attachments/assets/47d0bf48-fdac-4cd2-8807-a44e7ef12f8c)
-
-- **서포트 벡터 머신 (SVM, Support Vector Machine):** SVM은 데이터 포인트를 두 개의 클래스로 나누는 최적의 경계(결정 경계)를 찾는 알고리즘입니다. 주로 선형 분리 문제에 적합합니다.
-![image 10](https://github.com/user-attachments/assets/f14cc67c-d1f1-4296-b2b8-aa5cb31b21f8)
-
-- **랜덤 포레스트 (Random Forest):** 여러 개의 결정 트리(Decision Trees)를 학습시켜 각각의 예측을 결합하여 최종 예측을 수행하는 앙상블 학습 방법입니다.
-![image 11](https://github.com/user-attachments/assets/936f0c1f-d169-42ee-91dd-9308fe944dec)
-- **XGBoost (Extreme Gradient Boosting):** 결정 트리를 기반으로 앙상블 학습 알고리즘으로, Boosting 기법의 발전된 형태입니다. 하이퍼파라미터 값의 모든 조합을 학습하고, 최적의 조합을 찾습니다. 내장된 폴드 교차 검증 알고리즘으로 최적의 모델을 선택합니다.
-![image 12](https://github.com/user-attachments/assets/a3b7e85f-66c5-4fdf-b178-71bf04187af1)
-
-<br>
-
-# Code
-
-
-## ANN
+- 변동계수 계산 (Coefficient of Variation, CV) 하여 지역 간 편차 확인
 
 ```python
-# 인공 신경망(ANN) 모델 정의 및 학습
-ann_model = MLPClassifier(hidden_layer_sizes=(100,), max_iter=1000, random_state=42)
-ann_model.fit(X_train, y_train)
-
-# 테스트 데이터셋에 대한 예측 수행
-y_pred = ann_model.predict(X_test)
+range= cancer_data[cancer_columns].std() / cancer_data[cancer_columns].mean()
 ```
 
-## KNN
+- Tableau 맵 차트를 통해 암종/시기에 따른 연령표준화발생률 시각화
+- 시기/ 암종/지역별로 연령표준화발생률의 분포와 변화를 확인할 수 있도록 대시보드 생성
+
+![e1506d11-b85b-4aad-a9e3-9b812ef56b2e](https://github.com/user-attachments/assets/5eb69976-f2ea-44b0-8bb2-6204d47c5fa1)
+
+
+ **`tableau cloud에서 제공하는 javascript API를 활용해 웹페이지 임베딩`**
+
+## **질병관리청 지역사회건강조사**
+
+- Kendall Tau 상관계수 및 p-value Matrix 시각화
 
 ```python
-# KNN 모델 생성 (이웃 5명 기준)
-knn_model = KNeighborsClassifier(n_neighbors=5)
-
-# 모델 학습
-knn_model.fit(X_train, y_train)
-
-# 테스트 데이터로 예측 수행
-y_pred = knn_model.predict(X_test)
-```
-
-## SVM
-
-```python
-# 선형 커널을 사용하는 SVM 분류기 초기화 및 재현성을 위한 랜덤 상태 고정
-svm_model = SVC(kernel='linear', probability=True, random_state=42)
-
-# 학습 데이터로 모델 학습
-svm_model.fit(X_train, y_train)
-
-# 테스트 데이터에 대한 예측 수행
-y_pred = svm_model.predict(X_test)
+for col1 in columns:
+    for col2 in columns:
+        corr, p_value = kendalltau(corr_data[col1], corr_data[col2])
+        kendall_corr_matrix.loc[col1, col2] = corr
+        p_value_matrix.loc[col1, col2] = p_value
 
 ```
-
-## Random Forest
-
-```python
-# 재현성을 위한 랜덤 상태 고정으로 랜덤 포레스트 분류기 초기화
-rf_model = RandomForestClassifier(random_state=42)
-
-# 학습 데이터로 모델 학습
-rf_model.fit(X_train, y_train)
-
-# 테스트 데이터에 대한 예측 수행
-y_pred = rf_model.predict(X_test)
-```
-
-## XGBoost
-
-```python
-# 하이퍼파라미터 튜닝을 위한 파라미터 그리드 정의
-param_grid = {
-    'learning_rate': [0.05, 0.1, 0.2],  # 학습률 값
-    'max_depth': [3, 5, 7],             # 트리의 최대 깊이
-    'n_estimators': [50, 100, 200]      # 부스팅 라운드 수
-}
-
-# XGBoost 분류기 초기화
-xgb_model = xgb.XGBClassifier()
-
-# 교차 검증과 함께 그리드 서치를 설정
-grid_search = GridSearchCV(estimator=xgb_model, param_grid=param_grid, cv=3, n_jobs=-1, verbose=2)
-
-# 그리드 서치를 사용하여 학습 데이터에 모델 학습
-grid_search.fit(X_train, y_train)
-
-```
-
-# 학습 과정
-
----
-
-|  | ANN | KNN | SVM | Random Forest | XGBoost |
-| --- | --- | --- | --- | --- | --- |
-| Hyperparameter | •hidden_layer_sizes=(100,) •max_iter=1000 •random_state=42 |•n_neighbors=5 |  •kernel='linear’  | •random_state=42 | •param_grid = {'learning_rate': [0.05, 0.1, 0.2,'max_depth': [3, 5, 7], 'n_estimators': [50, 100, 200] }•cv = 3 •random_state=42 | 
-
-
-
-
-
-# 성능 평가 방식
-
-
-
-- 전체 데이터셋을 학습용 :평가용=8: 2로 분할합니다.
-- 학습 종료 후 Test data를 예측하도록 한 뒤, 정답 여부 확인합니다.
-- Confusion matrix 생성 후 Precision, Recall, F1-score, AUC를 계산하였습니다.
-
-![image 14](https://github.com/user-attachments/assets/95091072-e148-4e4a-97a3-e41a6d846ad6)
-![image 13](https://github.com/user-attachments/assets/efb9c8d2-ef7c-4bc6-88b3-e636244ba940)
-![image 15](https://github.com/user-attachments/assets/2d08456f-bea3-41b2-8110-a4f48b809abd)
-![image 16](https://github.com/user-attachments/assets/d26540eb-f110-4083-9655-da60fe382307)
-
 <br>
 
 # 결과
 
 
-## ANN
+## **암 발생지도(변동계수 1-3위)**
 
-|  | TEST 결과 |
-| --- | --- |
-| Recovered | •Precision: 0.75  •Recall: 0.23 •F1-score: 0.53 |
-| Not Recovered | •Precision: 0.52 •Recall: 0.92 •F1-score: 0.67 |
+![image 4](https://github.com/user-attachments/assets/473d8ede-2390-4e68-be4f-b028f9211f1b)
+<div style="display: flex; flex-direction: row;">
+    <h4 style="margin-right: 80px;">  1. 갑상선암 맵차트 </h4> 
+    <h4 style="margin-right: 80px;"> 2. 폐암 맵차트  </h4> 
+    <h4 style="margin-right: 80px;">    3. 자궁체부암 맵차트      </h4> 
+</div>
 
-![image 17](https://github.com/user-attachments/assets/a26ddd54-c598-493b-95d5-b6b18796e11b)
+## 변동계수 순위
 
-## KNN
+![image 5](https://github.com/user-attachments/assets/be345d7f-e8a0-4b58-891e-eba35720778c)
 
-|  | TEST 결과 |
-| --- | --- |
-| Recovered | •Precision: 0.75  •Recall: 0.23 •F1-score: 0.53 |
-| Not Recovered | •Precision: 0.52 •Recall: 0.92 •F1-score: 0.67 |
+## 
 
-![image 18](https://github.com/user-attachments/assets/5a81ddad-2d1b-4c5a-9018-d0798e82490a)
+## Kendall Tau 상관계수 및 p-value Matrix 시각화
 
-## SVM
+![image 6](https://github.com/user-attachments/assets/28b3e43f-7f3e-4ad9-acab-7f7a53a16dc6)
 
-|  | TEST 결과 |
-| --- | --- |
-| Recovered | •Precision: 0. 92  •Recall: 0.85 •F1-score: 0.88 |
-| Not Recovered | •Precision: 0.88  •Recall: 0.88  •F1-score: 0.88 |
-
-![image 19](https://github.com/user-attachments/assets/f4e098de-90f1-4c51-b5cb-42bf5e8edfdc)
-
-## Random Forest
-
-|  | TEST 결과 |
-| --- | --- |
-| Recovered | •Precision: 1.00 •Recall: 1.00 •F1-score: 1.00 |
-| Not Recovered | •Precision: 1.00  •Recall: 1.00 •F1-score: 1.00 |
-
-![image 20](https://github.com/user-attachments/assets/40938f6b-ff73-43da-8b3f-1ea501652957)
-
-## XGBoost
-
-|  | TEST 결과 |
-| --- | --- |
-| Recovered | •Precision: 1.00 •Recall: 0.85 •F1-score: 0.92 |
-| Not Recovered | •Precision: 0.86 •Recall: 1.00 •F1-score: 0.92 |
-
-![image 21](https://github.com/user-attachments/assets/565ada4d-c332-41ad-b707-a72b7fadbaa6)
-
-
-
-
-
-
-
+- 시/도별로 발생률의 편차가 가장 심한 암종은 ‘**갑상선암(C73)’(강원 115.3~ 전남 268.7)**’으로 확인되었고, 그 다음으로 ‘**폐암(C33~C34)(‘제주 210.3~ 경북 276.1)**과 **‘자궁체부암(C54)’(경남 13.10~서울 19.5)**으로 나타났습니다.
+- ‘**자궁체부암(C54)‘**과 ‘**당뇨**’가 Kendall Tau 상관계수 +0.53, P-value <0.001로 **유의미한 중간 정도의 상관관계**를 보였습니다.
+- **갑상선 암의 큰 지역 편차**를 설명하는 요인은 확인할 수 없었으나 , 기사를 통해 “국내 시도별 갑상선암 발생률은, 시도별 **갑상선암 검진율과 강한 상관관계를** 보였다＂는 복지부의 분석 결과를 찾을 수 있었습니다. (출처 :[암발생률, 지역별로 최대 15배 '격차' < 보건복지 < 정책 < 기사본문 - 메디칼업저버](http://www.monews.co.kr/news/articleView.html?idxno=95139) [(monews.co.kr)](http://www.monews.co.kr/news/articleView.html?idxno=95139))
 
 
 
